@@ -30,16 +30,23 @@ import axios from 'axios'
         },
         methods: {
             deletePost(id) {
-                // Send delete request then remove the post from local array.
+                // Optimistically remove the post from local array so the UI updates
+                // immediately (helps tests that query the DOM right after clicking).
+                const idNum = Number(id);
+                this.posts = this.posts.filter(p => Number(p.id) !== idNum);
+
+                // Send delete request to backend. If it fails, re-fetch posts.
                 axios.get(`${this.baseUrl}/deletePost`, {
                     params: { id: id }
                 }).then(response => {
-                    console.log(response.data)
-                    // Normalize to numbers to avoid string/number mismatches
-                    const idNum = Number(id);
-                    this.posts = this.posts.filter(p => Number(p.id) !== idNum);
+                    console.log('delete response', response.data)
                 }).catch(error => {
-                    this.posts = [{ entry: 'There was an error: ' + error.message }]
+                    console.error('delete failed, refetching posts', error)
+                    axios.get(`${this.baseUrl}/posts`).then(resp => {
+                        this.posts = resp.data
+                    }).catch(err => {
+                        this.posts = [{ entry: 'There was an error: ' + err.message }]
+                    })
                 })
             }
         },
