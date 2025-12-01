@@ -1,11 +1,6 @@
-
-<script setup>
-    // Import BlogPost component
-    import blogPost from './subcomponents/BlogPost2.vue'
- import axios from 'axios'
-</script>
-
 <script>
+import blogPost from './subcomponents/BlogPost2.vue'
+import axios from 'axios'
     export default {
         data() {
             return {
@@ -35,18 +30,14 @@
         },
         methods: {
             deletePost(id) {
-                // TODO: Complete the delete method
+                // Send delete request then remove the post from local array.
                 axios.get(`${this.baseUrl}/deletePost`, {
-                    params: {
-                        id: id,
-                    }
+                    params: { id: id }
                 }).then(response => {
-                    // this gets the data, which is an array
                     console.log(response.data)
-                    this.posts = this.posts.filter(post => post.id != id)
-
-                    // for ( let i = 0; )
-
+                    // Normalize to numbers to avoid string/number mismatches
+                    const idNum = Number(id);
+                    this.posts = this.posts.filter(p => Number(p.id) !== idNum);
                 }).catch(error => {
                     this.posts = [{ entry: 'There was an error: ' + error.message }]
                 })
